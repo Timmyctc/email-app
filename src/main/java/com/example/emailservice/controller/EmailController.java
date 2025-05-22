@@ -4,6 +4,7 @@ import com.example.emailservice.model.EmailRecord;
 import com.example.emailservice.model.EmailRequest;
 import com.example.emailservice.repository.EmailRecordRepository;
 import com.example.emailservice.service.EmailService;
+import com.example.emailservice.service.SqsSenderService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 
@@ -20,6 +21,13 @@ public class EmailController {
 
     private final EmailService emailService;
     private final EmailRecordRepository repository;
+    private final SqsSenderService senderService;
+
+    @PostMapping("/queue")
+    public ResponseEntity<String> queueEmail(@RequestBody @Valid EmailRequest request) {
+        senderService.sendEmailRequestToQueue(request);
+        return  ResponseEntity.ok("Email successfully sent to queue!");
+    }
 
     @PostMapping
     public ResponseEntity<String> sendEmail(@RequestBody @Valid EmailRequest request) {
@@ -32,7 +40,6 @@ public class EmailController {
          emailService.sendHtmlEmail(request);
          return ResponseEntity.ok("Email Sent!");
     }
-
 
     @GetMapping
     public List<EmailRecord> emailList() {
